@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>パーソナリティクイズ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .question-card {
+            background-color: #f4f4f4;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #2c3e50;
+        }
+        .options {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .option {
+            margin-right: 10px;
+        }
+        #results {
+            background-color: #e8f4f8;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        @media (max-width: 600px) {
+            .options {
+                flex-direction: column;
+            }
+            .option {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>パーソナリティクイズ</h1>
+    <div id="quiz"></div>
+    <button id="submit">結果を表示</button>
+    <div id="results" style="display: none;"></div>
+
+    <script>
+        const questionnaire = {
+            categories: {
+                A: "Analytical",
+                B: "Bureaucratic",
+                C: "Communicative",
+                D: "Digital",
+                V: "Visual",
+                K: "Kinesthetic"
+            },
+            questions: [
+                { id: "A1", category: "A", text: "人が話す言葉には、その人を表す本質があると思う" },
+                { id: "A2", category: "A", text: "人の話には、よく注目する" },
+                { id: "A3", category: "A", text: "話している声のトーンで、感情を言い当てられる" },
+                { id: "A4", category: "A", text: "耳で音を感じ取ることが好きだ" },
+                { id: "A5", category: "A", text: "音声を聴いて勉強することが好きだ" },
+                { id: "A6", category: "A", text: "周りの雑音がとても気になる方だ" },
+                { id: "A7", category: "A", text: "人から聞いたことは、よく覚えている" },
+                { id: "A8", category: "A", text: "「なぜ？」が口癖になっている" },
+                { id: "A9", category: "A", text: "金銭感覚は鋭い方だ" },
+                { id: "A10", category: "A", text: "空想よりも現実的なものが好きだ" },
+                { id: "B1", category: "B", text: "計画通りに実行することに満足感を感じる" },
+                { id: "B2", category: "B", text: "繰り返しの作業が好きだ" },
+                { id: "B3", category: "B", text: "ルールをきちんと守る事は当たり前だ" },
+                { id: "B4", category: "B", text: "問題解決は個人よりも責任ある人が対応すべきだ" },
+                { id: "B5", category: "B", text: "予定にない事が起きると不安になる" },
+                { id: "B6", category: "B", text: "何があるか分からないから保険は入っておいた方がいい" },
+                { id: "B7", category: "B", text: "何か問題解決には、まずは手順を決める事が必要" },
+                { id: "B8", category: "B", text: "現状を守る事は大切だ" },
+                { id: "B9", category: "B", text: "物の置き場などをきちんと決めておきたい" },
+                { id: "B10", category: "B", text: "新しい事は「今」の秩序が変わるから好きでない" },
+                { id: "C1", category: "C", text: "ルールよりも人の気持ちを優先すべきだ" },
+                { id: "C2", category: "C", text: "人に教えるのが大好きだ" },
+                { id: "C3", category: "C", text: "いろいろなものに感動しやすい" },
+                { id: "C4", category: "C", text: "とても話し好きだ（おしゃべり大好き）" },
+                { id: "C5", category: "C", text: "感情表現がとても豊かだ（激しい）" },
+                { id: "C6", category: "C", text: "何か問題がおきたときは人間関係を優先して考える" },
+                { id: "C7", category: "C", text: "人の気持ちがわかる(感じる)" },
+                { id: "C8", category: "C", text: "人をサポートするのが好きだ" },
+                { id: "C9", category: "C", text: "人から頼まれるといやとは言えない" },
+                { id: "C10", category: "C", text: "自分が大好きな人の意見だと素直に受け入れられる" },
+                { id: "D1", category: "D", text: "直感で判断するのが得意である" },
+                { id: "D2", category: "D", text: "自分の勘(感覚)を重視したい" },
+                { id: "D3", category: "D", text: "想像力がある（発想が溢れてくる）" },
+                { id: "D4", category: "D", text: "リスクがある方が変化があって楽しい" },
+                { id: "D5", category: "D", text: "わくわくする作業・活動が好きだ" },
+                { id: "D6", category: "D", text: "驚きがある事が大好きだ" },
+                { id: "D7", category: "D", text: "好奇心が極めて旺盛である" },
+                { id: "D8", category: "D", text: "周りが驚くような大胆な行動をすることがある" },
+                { id: "D9", category: "D", text: "ルールに縛られるのは嫌だ" },
+                { id: "D10", category: "D", text: "グループより単独行動の方が能力を発揮できると思う" },
+                { id: "V1", category: "V", text: "物事は、見た目でほとんど決まってしまうと思う" },
+                { id: "V2", category: "V", text: "色彩感覚が豊かだねと言われる" },
+                { id: "V3", category: "V", text: "見たイメージは鮮明に記憶に残る方だ" },
+                { id: "V4", category: "V", text: "見た目はとても重視する" },
+                { id: "V5", category: "V", text: "絵やイラストを見たり、書いたりして覚えるのが得意だ" },
+                { id: "V6", category: "V", text: "映画、ドラマが好きな人だねと言われる" },
+                { id: "V7", category: "V", text: "服装やファッションには、こだわりがある" },
+                { id: "A1_VAK", category: "A", text: "人が話す言葉には、その人を表す本質があると思う" },
+                { id: "A2_VAK", category: "A", text: "人の話には、よく注目する" },
+                { id: "A3_VAK", category: "A", text: "話している声のトーンで、感情を言い当てられる" },
+                { id: "A4_VAK", category: "A", text: "耳で音を感じ取ることが好きだ" },
+                { id: "A5_VAK", category: "A", text: "音声を聴いて勉強することが好きだ" },
+                { id: "A6_VAK", category: "A", text: "周りの雑音がとても気になる方だ" },
+                { id: "A7_VAK", category: "A", text: "人から聞いたことは、よく覚えている" },
+                { id: "K1", category: "K", text: "身体のフィーリングを大切にしている" },
+                { id: "K2", category: "K", text: "物を買うとき、手触り、肌触りを重視する" },
+                { id: "K3", category: "K", text: "手を使って書くと記憶に残りやすい方だ" },
+                { id: "K4", category: "K", text: "人から、よく体を動かす人だねと言われることがある" },
+                { id: "K5", category: "K", text: "他の人と肌と肌で触れあうことが大切だと思う" },
+                { id: "K6", category: "K", text: "体で自分を表現したり、パフォーマンスをすることが好きだ" },
+                { id: "K7", category: "K", text: "人の動作をまねすることがうまいと人に言われる" }
+            ],
+            answerOptions: [
+                { value: 1, text: "そう思わない" },
+                { value: 2, text: "あまりそう思わない" },
+                { value: 3, text: "どちらとも言えない" },
+                { value: 4, text: "少しそう思う" },
+                { value: 5, text: "そう思う" }
+            ]
+        };
+
+        function renderQuiz() {
+            const quizContainer = document.getElementById('quiz');
+            questionnaire.questions.forEach((question, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                questionCard.innerHTML = `
+                    <h2>問${index + 1}: ${question.text}</h2>
+                    <div class="options">
+                        ${questionnaire.answerOptions.map(option => `
+                            <label class="option">
+                                <input type="radio" name="${question.id}" value="${option.value}">
+                                ${option.text}
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+                quizContainer.appendChild(questionCard);
+            });
+        }
+
+        function calculateScores() {
+            const scores = {
+                ABCD: {},
+                VAK: {}
+            };
+            Object.keys(questionnaire.categories).forEach(category => {
+                scores.ABCD[category] = 0;
+                scores.VAK[category] = 0;
+            });
+
+            questionnaire.questions.forEach(question => {
+                const selectedOption = document.querySelector(`input[name="${question.id}"]:checked`);
+                if (selectedOption) {
+                    if (question.id.includes('_VAK')) {
+                        scores.VAK[question.category] += parseInt(selectedOption.value);
+                    } else {
+                        scores.ABCD[question.category] += parseInt(selectedOption.value);
+                    }
+                }
+            });
+
+            return scores;
+        }
+
+        function displayResults(scores) {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '<h2>結果</h2>';
+            
+            resultsContainer.innerHTML += '<h3>ABCD結果:</h3>';
+            Object.entries(scores.ABCD).forEach(([category, score]) => {
+                if (score > 0) {
+                    const maxScore = questionnaire.questions.filter(q => q.category === category && !q.id.includes('_VAK')).length * 5;
+                    const percentage = ((score / maxScore) * 100).toFixed(1);
+                    resultsContainer.innerHTML += `
+                        <p>${questionnaire.categories[category]} (${category}) スコア: ${score} / ${maxScore} (${percentage}%)</p>
+                    `;
+                }
+            });
+
+            resultsContainer.innerHTML += '<h3>VAK結果:</h3>';
+            Object.entries(scores.VAK).forEach(([category, score]) => {
+                if (score > 0) {
+                    const maxScore = questionnaire.questions.filter(q => q.category === category && q.id.includes('_VAK')).length * 5;
+                    const percentage = ((score / maxScore) * 100).toFixed(1);
+                    resultsContainer.innerHTML += `
+                        <p>${questionnaire.categories[category]} (${category}) スコア: ${score} / ${maxScore} (${percentage}%)</p>
+                    `;
+                }
+            });
+
+            resultsContainer.style.display = 'block';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderQuiz();
+            document.getElementById('submit').addEventListener('click', () => {
+                const scores = calculateScores();
+                displayResults(scores);
+            });
+        });
+    </script>
+</body>
+</html>
